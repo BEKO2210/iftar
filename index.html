@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#070b14">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="Iftar Kompass – Gebetszeiten & Iftar-Countdown für Ramadan 2026. Offizielle Diyanet-Zeiten für Deutschland.">
+    <meta name="description" content="Iftar Kompass – Gebetszeiten & Iftar-Countdown für Ramadan 2026. Offizielle Diyanet-Zeiten für die Region Stuttgart.">
     <title>Iftar Kompass 🌙</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,20 +43,15 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Touch delay fix */
-        button, input, a { touch-action: manipulation; }
+        button, select, a { touch-action: manipulation; }
 
-        /* ── Autofill fix for dark theme ── */
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover,
-        input:-webkit-autofill:focus {
+        select:-webkit-autofill,
+        select:-webkit-autofill:hover,
+        select:-webkit-autofill:focus {
             -webkit-text-fill-color: var(--text) !important;
             -webkit-box-shadow: 0 0 0 40px var(--bg-input) inset !important;
-            caret-color: var(--text);
-            transition: background-color 5000s ease-in-out 0s;
         }
 
-        /* ── Selection ── */
         ::selection { background: rgba(212,168,83,0.25); color: var(--text); }
 
         /* ── Starfield ── */
@@ -106,23 +101,26 @@
             margin-top: 2px; font-weight: 300;
         }
 
-        /* ── Search ── */
+        /* ── Dropdown ── */
         .search { animation: up .6s .18s both; margin-bottom: 16px; }
-        .s-row { display: flex; gap: 8px; align-items: stretch; }
-        .s-fields { display: flex; gap: 6px; flex: 1; min-width: 0; }
 
         .inp {
             height: 46px; width: 100%;
             background: var(--bg-input);
             border: 1.5px solid var(--border-subtle);
-            color: var(--text); padding: 0 12px;
+            color: var(--text); padding: 0 36px 0 14px;
             border-radius: var(--r);
             font-family: 'Outfit', sans-serif;
-            font-size: 16px; /* prevent iOS zoom */
+            font-size: 16px;
             transition: border-color .25s, box-shadow .25s;
             -webkit-appearance: none; appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d4a853' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
         }
-        .inp::placeholder { color: var(--text-dim); font-size: 0.82rem; }
+        .inp option { background: #0f1423; color: var(--text); }
         .inp:focus {
             outline: none; border-color: var(--gold);
             box-shadow: 0 0 0 3px var(--gold-glow);
@@ -131,49 +129,6 @@
             outline: 2px solid var(--gold-light);
             outline-offset: 1px;
         }
-        .inp-plz {
-            flex: 1;
-            text-align: center;
-            font-family: 'JetBrains Mono', monospace;
-            letter-spacing: 2.5px; font-weight: 500;
-            font-size: 1.1rem;
-        }
-
-        /* Search button */
-        .btn-go {
-            width: 46px; min-width: 46px; height: 46px;
-            border: none; border-radius: var(--r);
-            background: linear-gradient(145deg, var(--gold-light) -20%, var(--gold) 50%, var(--gold-dark) 120%);
-            color: #0a0e1a; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow:
-                0 2px 10px rgba(212,168,83,0.25),
-                0 0 20px rgba(212,168,83,0.08),
-                inset 0 1px 0 rgba(255,255,255,0.2);
-            transition: transform .15s, box-shadow .15s, opacity .2s;
-            -webkit-tap-highlight-color: transparent;
-            flex-shrink: 0;
-            position: relative;
-            overflow: hidden;
-        }
-        /* Shimmer on hover/focus */
-        .btn-go::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.25) 50%, transparent 65%);
-            transform: translateX(-110%);
-            transition: transform .45s ease;
-        }
-        .btn-go:hover::after, .btn-go:focus-visible::after { transform: translateX(110%); }
-        .btn-go svg { width: 19px; height: 19px; position: relative; z-index: 1; }
-        .btn-go:active {
-            transform: scale(0.88);
-            box-shadow: 0 1px 4px rgba(212,168,83,0.15), inset 0 1px 0 rgba(255,255,255,0.1);
-        }
-        .btn-go:focus-visible {
-            outline: 2px solid var(--gold-light);
-            outline-offset: 2px;
-        }
-        .btn-go:disabled { opacity: 0.35; pointer-events: none; }
 
         /* Location meta */
         .s-meta {
@@ -189,8 +144,6 @@
             vertical-align: middle; line-height: 1;
         }
         .badge-ok { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.22); }
-        .badge-verified { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
-        .badge-fb { background: rgba(212,168,83,0.08); color: var(--gold); border: 1px solid rgba(212,168,83,0.15); }
 
         /* ── Countdown ── */
         .cd { text-align: center; padding: 6px 0 16px; animation: up .6s .3s both; }
@@ -256,7 +209,7 @@
         }
         .prog-bar {
             height: 3px; background: rgba(100,116,139,0.08);
-            border-radius: 3px; overflow: visible; /* allow dot to show */
+            border-radius: 3px; overflow: visible;
             position: relative;
         }
         .prog-fill {
@@ -272,8 +225,8 @@
             pointer-events: none;
         }
 
-        /* ── Prayer cards ── */
-        .prayers {
+        /* ── Cards ── */
+        .cards {
             display: grid; grid-template-columns: 1fr 1fr;
             gap: 8px; animation: up .6s .45s both;
         }
@@ -311,9 +264,9 @@
         .p.iftar .p-n { color: var(--gold); font-weight: 500; }
         .p.iftar .p-t { color: var(--gold-light); }
 
-        /* Current prayer */
-        .p.now { border-color: rgba(52,211,153,0.18); background: rgba(52,211,153,0.03); }
-        .p.now::after { background: var(--green); }
+        /* Day card */
+        .p.day::after { background: var(--green); }
+        .p.day .p-n { color: var(--green); font-weight: 500; }
 
         /* ── Footer ── */
         .ft {
@@ -321,50 +274,13 @@
             font-size: 0.6rem; color: var(--text-dim);
             line-height: 1.55; animation: up .6s .55s both;
         }
-        .ft a { color: var(--gold); opacity: 0.5; text-decoration: none; }
         .ft b { color: var(--text-sec); font-weight: 500; }
-
-        /* ── Overlay spinner ── */
-        .ov {
-            display: none; position: fixed; inset: 0; z-index: 50;
-            background: rgba(7,11,20,0.85);
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            align-items: center; justify-content: center;
-            flex-direction: column; gap: 14px;
-        }
-        .ov.on { display: flex; }
-        .ov-ring {
-            width: 36px; height: 36px;
-            border: 2.5px solid rgba(212,168,83,0.1);
-            border-top-color: var(--gold);
-            border-radius: 50%; animation: spin .7s linear infinite;
-        }
-        .ov-t { font-size: 0.76rem; color: var(--text-sec); }
-
-        /* ── Toast ── */
-        .toast {
-            position: fixed; bottom: calc(24px + var(--safe-b));
-            left: 50%; max-width: calc(100vw - 40px); width: auto;
-            transform: translateX(-50%) translateY(120px);
-            background: rgba(15,20,35,0.94); backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(248,113,113,0.2);
-            color: #fca5a5; padding: 12px 20px;
-            border-radius: var(--r);
-            font-size: 0.82rem; font-family: 'Outfit', sans-serif;
-            z-index: 100; text-align: center; white-space: nowrap;
-            transition: transform .4s cubic-bezier(.16,1,.3,1);
-            box-shadow: 0 10px 32px rgba(0,0,0,0.5);
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); }
 
         /* ── Responsive ── */
         @media (max-width: 359px) {
             .hdr h1 { font-size: 1.6rem; }
             .cd-time { font-size: 2.1rem; }
             .p-t { font-size: 0.95rem; }
-            .inp-plz { width: 72px; min-width: 72px; }
-            .btn-go { width: 42px; min-width: 42px; height: 42px; }
             .inp { height: 42px; }
         }
         @media (min-width: 360px) and (max-width: 389px) {
@@ -375,9 +291,8 @@
         }
         @media (min-height: 780px) {
             .cd { padding: 10px 0 22px; }
-            .prayers { gap: 10px; }
+            .cards { gap: 10px; }
         }
-        /* Landscape phone */
         @media (max-height: 500px) and (orientation: landscape) {
             .cd-orb { width: 50px; height: 50px; margin-bottom: 6px; }
             .cd-moon { width: 40px; height: 40px; }
@@ -385,10 +300,9 @@
             .cd-time { font-size: 2rem; }
             .cd { padding: 2px 0 8px; }
             .hdr { padding: 8px 0 6px; }
-            .prayers { gap: 6px; }
+            .cards { gap: 6px; }
             .p { padding: 10px; }
         }
-        /* Accessibility: reduced motion */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -402,8 +316,6 @@
 <body>
 
 <div class="sky" id="sky"></div>
-<div class="ov" id="ov"><div class="ov-ring"></div><div class="ov-t">Gebetszeiten laden…</div></div>
-<div class="toast" id="toast"></div>
 
 <div class="app">
     <header class="hdr">
@@ -413,14 +325,9 @@
     </header>
 
     <div class="search">
-        <div class="s-row">
-            <div class="s-fields">
-                <input type="text" id="plz" class="inp inp-plz" placeholder="PLZ eingeben" maxlength="5" inputmode="numeric" pattern="[0-9]*" autocomplete="postal-code" enterkeyhint="search">
-            </div>
-            <button class="btn-go" id="btnGo" aria-label="Suchen">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            </button>
-        </div>
+        <select id="city" class="inp">
+            <option value="">Stadt wählen…</option>
+        </select>
         <div class="s-meta" id="meta"></div>
     </div>
 
@@ -436,13 +343,9 @@
         <div class="prog-bar"><div class="prog-fill" id="pFill"><div class="prog-dot"></div></div></div>
     </div>
 
-    <div class="prayers" id="prayers">
-        <div class="p" id="cFajr"><div class="p-n">İmsak · Sahur</div><div class="p-t" id="vF">--:--</div></div>
-        <div class="p" id="cSun"><div class="p-n">Güneş</div><div class="p-t" id="vSu">--:--</div></div>
-        <div class="p" id="cDhu"><div class="p-n">Öğle</div><div class="p-t" id="vD">--:--</div></div>
-        <div class="p" id="cAsr"><div class="p-n">İkindi</div><div class="p-t" id="vA">--:--</div></div>
-        <div class="p iftar" id="cMag"><div class="p-n">Akşam · İftar ☽</div><div class="p-t" id="vM">--:--</div></div>
-        <div class="p" id="cIsha"><div class="p-n">Yatsı</div><div class="p-t" id="vI">--:--</div></div>
+    <div class="cards">
+        <div class="p iftar"><div class="p-n">Akşam · İftar ☽</div><div class="p-t" id="vM">--:--</div></div>
+        <div class="p day"><div class="p-n">Ramadan 2026</div><div class="p-t" id="vDay">Tag --</div></div>
     </div>
 
     <div class="ft" id="ft">Ramadan Mubarak 🌙</div>
@@ -452,262 +355,179 @@
 /* Stars */
 (()=>{const c=document.getElementById('sky');for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2.5+Math.random()*5}s;--o:${(.2+Math.random()*.4).toFixed(2)};animation-delay:${Math.random()*5}s;width:${.8+Math.random()*1.6}px;height:${.8+Math.random()*1.6}px`;c.appendChild(s)}})();
 
-/* State */
-let T=null, tk=null, src='', verified=false;
+/* ═══ FESTE IFTAR-ZEITEN · Ramadan 2026 (18. Feb – 19. März) ═══ */
+/* Quelle: Diyanet İşleri Başkanlığı – Maghrib/İftar pro Tag */
+const D={
+'Backnang':'17:50,17:52,17:53,17:55,17:56,17:58,18:00,18:01,18:03,18:04,18:06,18:08,18:09,18:11,18:12,18:14,18:16,18:17,18:19,18:20,18:22,18:24,18:25,18:27,18:29,18:30,18:32,18:33,18:35,18:37',
+'Bietigheim-Bissingen':'17:48,17:50,17:51,17:53,17:55,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:28,18:29,18:31,18:32,18:34,18:36',
+'Böblingen':'17:48,17:50,17:51,17:53,17:54,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Denkendorf':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:36',
+'Ditzingen':'17:48,17:50,17:51,17:53,17:55,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Eislingen/Fils':'17:51,17:53,17:54,17:56,17:57,17:59,18:01,18:02,18:04,18:05,18:07,18:09,18:10,18:12,18:13,18:15,18:17,18:18,18:20,18:22,18:23,18:25,18:26,18:28,18:30,18:31,18:33,18:34,18:36,18:38',
+'Esslingen am Neckar':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:36',
+'Fellbach':'17:49,17:51,17:52,17:54,17:55,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:36',
+'Filderstadt':'17:49,17:51,17:52,17:54,17:55,17:57,17:59,18:00,18:02,18:03,18:05,18:07,18:08,18:10,18:11,18:13,18:15,18:16,18:18,18:20,18:21,18:23,18:24,18:26,18:28,18:29,18:31,18:32,18:34,18:36',
+'Freiberg am Neckar':'17:49,17:51,17:52,17:54,17:55,17:57,17:59,18:00,18:02,18:03,18:05,18:07,18:08,18:10,18:11,18:13,18:15,18:16,18:18,18:20,18:21,18:23,18:24,18:26,18:28,18:29,18:31,18:32,18:34,18:36',
+'Gärtringen':'17:47,17:49,17:50,17:52,17:54,17:55,17:57,17:58,18:00,18:01,18:03,18:05,18:06,18:08,18:10,18:11,18:13,18:14,18:16,18:18,18:19,18:21,18:22,18:24,18:26,18:27,18:29,18:30,18:32,18:35',
+'Geislingen an der Steige':'17:51,17:53,17:54,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:08,18:09,18:11,18:12,18:14,18:16,18:17,18:19,18:20,18:22,18:24,18:26,18:27,18:29,18:30,18:32,18:34,18:35,18:37,18:38',
+'Gerlingen':'17:48,17:50,17:51,17:53,17:55,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Göppingen':'17:50,17:52,17:53,17:55,17:57,17:58,18:00,18:01,18:03,18:05,18:07,18:08,18:10,18:11,18:13,18:15,18:16,18:18,18:19,18:21,18:23,18:25,18:26,18:28,18:29,18:31,18:33,18:34,18:36,18:38',
+'Herrenberg':'17:47,17:49,17:50,17:52,17:54,17:55,17:57,17:58,18:00,18:01,18:03,18:05,18:06,18:08,18:10,18:11,18:13,18:14,18:16,18:18,18:19,18:21,18:22,18:24,18:26,18:27,18:29,18:30,18:32,18:34',
+'Holzgerlingen':'17:48,17:50,17:51,17:53,17:54,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Kirchheim unter Teck':'17:50,17:52,17:53,17:55,17:56,17:58,18:00,18:01,18:03,18:04,18:06,18:08,18:09,18:11,18:12,18:14,18:16,18:17,18:19,18:20,18:22,18:24,18:25,18:27,18:29,18:30,18:32,18:33,18:35,18:37',
+'Kornwestheim':'17:49,17:51,17:52,17:54,17:55,17:57,17:59,18:00,18:02,18:03,18:05,18:07,18:08,18:10,18:11,18:13,18:15,18:16,18:18,18:20,18:21,18:23,18:24,18:26,18:28,18:29,18:31,18:32,18:34,18:36',
+'Leinfelden-Echterdingen':'17:48,17:50,17:51,17:53,17:55,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:36',
+'Leonberg':'17:48,17:50,17:51,17:53,17:54,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Leutenbach':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:37',
+'Ludwigsburg':'17:49,17:51,17:52,17:54,17:55,17:57,17:59,18:00,18:02,18:03,18:05,18:07,18:08,18:10,18:11,18:13,18:15,18:16,18:18,18:20,18:21,18:23,18:24,18:26,18:28,18:29,18:31,18:32,18:34,18:36',
+'Marbach am Neckar':'17:49,17:51,17:52,17:54,17:55,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:36',
+'Markgröningen':'17:48,17:50,17:51,17:53,17:55,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Möglingen':'17:48,17:50,17:51,17:53,17:55,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Murrhardt':'17:50,17:52,17:53,17:55,17:57,17:58,18:00,18:01,18:03,18:04,18:06,18:08,18:09,18:11,18:12,18:14,18:16,18:17,18:19,18:20,18:22,18:24,18:25,18:27,18:29,18:30,18:32,18:33,18:35,18:37',
+'Neuhausen auf den Fildern':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:36',
+'Nürtingen':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:36',
+'Ostfildern':'17:49,17:51,17:52,17:54,17:55,17:57,17:59,18:00,18:02,18:03,18:05,18:07,18:08,18:10,18:12,18:13,18:15,18:16,18:18,18:20,18:21,18:23,18:24,18:26,18:28,18:29,18:31,18:32,18:34,18:36',
+'Plochingen':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:29,18:30,18:32,18:33,18:35,18:37',
+'Remshalden':'17:50,17:52,17:53,17:55,17:56,17:58,18:00,18:01,18:03,18:04,18:06,18:08,18:09,18:11,18:12,18:14,18:16,18:17,18:19,18:21,18:22,18:24,18:25,18:27,18:29,18:30,18:32,18:33,18:35,18:37',
+'Renningen':'17:47,17:49,17:50,17:52,17:54,17:55,17:57,17:58,18:00,18:01,18:03,18:05,18:06,18:08,18:10,18:11,18:13,18:14,18:16,18:18,18:19,18:21,18:22,18:24,18:27,18:28,18:30,18:31,18:33,18:35',
+'Rudersberg':'17:50,17:52,17:53,17:55,17:56,17:58,18:00,18:01,18:03,18:05,18:07,18:08,18:10,18:11,18:13,18:15,18:16,18:18,18:19,18:21,18:23,18:25,18:26,18:28,18:29,18:31,18:33,18:34,18:36,18:37',
+'Rutesheim':'17:48,17:50,17:51,17:53,17:54,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Schönaich':'17:48,17:50,17:51,17:53,17:54,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Schorndorf':'17:50,17:52,17:53,17:55,17:56,17:58,18:00,18:01,18:03,18:05,18:07,18:08,18:10,18:11,18:13,18:15,18:16,18:18,18:19,18:21,18:23,18:25,18:26,18:28,18:29,18:31,18:33,18:34,18:36,18:37',
+'Schwaikheim':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:36',
+'Sindelfingen':'17:48,17:50,17:51,17:53,17:54,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Steinheim an der Murr':'17:49,17:51,17:52,17:54,17:55,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:36',
+'Stuttgart':'17:49,17:51,17:52,17:54,17:55,17:57,17:59,18:00,18:02,18:03,18:05,18:07,18:08,18:10,18:11,18:13,18:15,18:16,18:18,18:19,18:21,18:23,18:24,18:26,18:28,18:29,18:31,18:32,18:34,18:36',
+'Süßen':'17:51,17:53,17:54,17:56,17:57,17:59,18:01,18:02,18:04,18:06,18:08,18:09,18:11,18:12,18:14,18:16,18:17,18:19,18:20,18:22,18:24,18:26,18:27,18:29,18:30,18:32,18:34,18:35,18:37,18:38',
+'Tamm':'17:48,17:50,17:51,17:53,17:55,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:11,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:36',
+'Vaihingen an der Enz':'17:48,17:50,17:51,17:53,17:54,17:56,17:58,17:59,18:01,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:19,18:20,18:22,18:23,18:25,18:27,18:28,18:30,18:31,18:33,18:35',
+'Waiblingen':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:36',
+'Weil der Stadt':'17:47,17:49,17:50,17:52,17:54,17:55,17:57,17:58,18:00,18:01,18:03,18:05,18:06,18:08,18:10,18:11,18:13,18:14,18:16,18:18,18:19,18:21,18:22,18:24,18:26,18:27,18:29,18:30,18:32,18:35',
+'Weinstadt':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:37',
+'Welzheim':'17:50,17:52,17:53,17:55,17:57,17:58,18:00,18:01,18:03,18:05,18:07,18:08,18:10,18:11,18:13,18:15,18:16,18:18,18:19,18:21,18:23,18:25,18:26,18:28,18:29,18:31,18:33,18:34,18:36,18:38',
+'Wendlingen am Neckar':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:28,18:30,18:32,18:33,18:35,18:36',
+'Wernau (Neckar)':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:29,18:30,18:32,18:33,18:35,18:37',
+'Winnenden':'17:49,17:51,17:52,17:54,17:56,17:57,17:59,18:00,18:02,18:04,18:06,18:07,18:09,18:10,18:12,18:14,18:15,18:17,18:18,18:20,18:22,18:24,18:25,18:27,18:29,18:30,18:32,18:33,18:35,18:37'
+};
+
+/* ═══ RAMADAN 2026: 18. Feb (Tag 1) – 19. März (Tag 30) ═══ */
+const R_START=new Date(2026,1,18);
+const R_DAYS=30;
 
 /* Helpers */
 const $=id=>document.getElementById(id);
-function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500)}
-function busy(on){$('ov').classList.toggle('on',on);$('btnGo').disabled=on}
-function hm(s){if(!s)return null;const p=s.replace(/\s*\(.*\)/,'').trim().split(':');const h=parseInt(p[0]),m=parseInt(p[1]);return isNaN(h)||isNaN(m)?null:{h,m}}
 function pad(n){return String(n).padStart(2,'0')}
-/* Compare two HH:MM times – returns absolute difference in minutes */
-function timeDiffMin(a,b){const ta=hm(a),tb=hm(b);if(!ta||!tb)return 999;return Math.abs((ta.h*60+ta.m)-(tb.h*60+tb.m))}
+function hm(s){if(!s)return null;const p=s.split(':');const h=parseInt(p[0]),m=parseInt(p[1]);return isNaN(h)||isNaN(m)?null:{h,m}}
 
-/* Date */
+/* Ramadan-Tag Index (0-29), oder -1 wenn außerhalb */
+function dayIdx(){
+    const now=new Date();
+    const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const d=Math.floor((today-R_START)/86400000);
+    return(d>=0&&d<R_DAYS)?d:-1;
+}
+
+/* Geschätzter İmsak für Fortschrittsbalken (Region Stuttgart) */
+/* Feb 18: ~05:49, Mar 19: ~04:33 – lineare Interpolation */
+function estImsak(di){
+    const s=349,e=273;
+    const m=Math.round(s+(e-s)*di/29);
+    return pad(Math.floor(m/60))+':'+pad(m%60);
+}
+
+/* Datum-Anzeige */
 $('dateStr').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-/* PLZ: nur Ziffern erlauben */
-$('plz').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'')});
+/* Dropdown befüllen (alphabetisch sortiert) */
+const sel=$('city');
+Object.keys(D).sort((a,b)=>a.localeCompare(b,'de')).forEach(c=>{
+    const o=document.createElement('option');
+    o.value=c;o.textContent=c;sel.appendChild(o);
+});
+/* Gespeicherte Stadt oder Standard */
+const saved=localStorage.getItem('iftarCity');
+if(saved&&D[saved])sel.value=saved;
+else sel.value='Stuttgart';
 
-/* ═══ DIYANET PROXY ═══ */
-const DY='https://prayertimes.api.abdus.dev/api/diyanet';
+/* ═══ ANZEIGE ═══ */
+let tk=null;
 
-async function dySearch(city){
-    try{
-        const r=await fetch(`${DY}/search?q=${encodeURIComponent(city)}`,{signal:AbortSignal.timeout(6000)});
-        if(!r.ok)return null;const d=await r.json();if(!d||!d.length)return null;
-        const de=d.filter(x=>x.country&&(x.country.includes('ALMANYA')||x.country.includes('GERMANY')));
-        if(de.length){const ex=de.find(x=>x.region&&x.region.toUpperCase().includes(city.toUpperCase()));return ex||de[0]}
-        return d[0];
-    }catch(e){return null}
-}
+function show(){
+    const city=sel.value;
+    if(!city||!D[city])return;
+    localStorage.setItem('iftarCity',city);
 
-async function dyTimes(id){
-    try{
-        const r=await fetch(`${DY}/prayertimes?location_id=${id}`,{signal:AbortSignal.timeout(8000)});
-        if(!r.ok)return null;const d=await r.json();if(!d||!d.length)return null;
-        const now=new Date(),key=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-        const e=d.find(x=>x.date&&x.date.startsWith(key));
-        return e?{fajr:e.fajr,sunrise:e.sun,dhuhr:e.dhuhr,asr:e.asr,maghrib:e.maghrib,isha:e.isha}:null;
-    }catch(e){return null}
-}
+    const di=dayIdx();
 
-/* ═══ ALADHAN ═══ */
-async function alTimes(lat,lng){
-    const n=new Date();
-    const r=await fetch(`https://api.aladhan.com/v1/timings/${pad(n.getDate())}-${pad(n.getMonth()+1)}-${n.getFullYear()}?latitude=${lat}&longitude=${lng}&method=13`,{signal:AbortSignal.timeout(10000)});
-    if(!r.ok)throw 0;const j=await r.json();if(j.code!==200)throw 0;
-    const t=j.data.timings,c=s=>s?s.replace(/\s*\(.*\)/,'').trim():'--:--';
-    return{fajr:c(t.Imsak||t.Fajr),sunrise:c(t.Sunrise),dhuhr:c(t.Dhuhr),asr:c(t.Asr),maghrib:c(t.Maghrib),isha:c(t.Isha)};
-}
-
-/* ═══ GEOCODING ═══ */
-async function geo(plz){
-    try{
-        const r=await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(plz)}&country=Germany&format=json&limit=3&accept-language=de`,{signal:AbortSignal.timeout(6000)});
-        const d=await r.json();if(d&&d.length)return d[0];
-    }catch(e){}
-    return null;
-}
-
-/* ═══ KNOWN PLZ → DIYANET (schneller Pfad) ═══ */
-const K={
-    '71691':{i:11048,n:'Freiberg am Neckar'},'71636':{i:11048,n:'Ludwigsburg'},
-    '71638':{i:11048,n:'Ludwigsburg'},'71640':{i:11048,n:'Ludwigsburg'},
-    '71642':{i:11048,n:'Ludwigsburg'},'71634':{i:11048,n:'Ludwigsburg'},
-    '70173':{i:11027,n:'Stuttgart'},'70174':{i:11027,n:'Stuttgart'},
-    '70176':{i:11027,n:'Stuttgart'},'70178':{i:11027,n:'Stuttgart'},
-    '70180':{i:11027,n:'Stuttgart'},'70182':{i:11027,n:'Stuttgart'},
-    '70184':{i:11027,n:'Stuttgart'},'70186':{i:11027,n:'Stuttgart'},
-    '70188':{i:11027,n:'Stuttgart'},'70190':{i:11027,n:'Stuttgart'},
-    '70191':{i:11027,n:'Stuttgart'},'70192':{i:11027,n:'Stuttgart'},
-    '70193':{i:11027,n:'Stuttgart'},'70195':{i:11027,n:'Stuttgart'},
-    '70197':{i:11027,n:'Stuttgart'},'70199':{i:11027,n:'Stuttgart'},
-    '70327':{i:11027,n:'Stuttgart'},'70329':{i:11027,n:'Stuttgart'},
-    '70372':{i:11027,n:'Stuttgart'},'70374':{i:11027,n:'Stuttgart'},
-    '70376':{i:11027,n:'Stuttgart'},'70378':{i:11027,n:'Stuttgart'},
-    '70435':{i:11027,n:'Stuttgart'},'70437':{i:11027,n:'Stuttgart'},
-    '70439':{i:11027,n:'Stuttgart'},'70499':{i:11027,n:'Stuttgart'},
-    '70563':{i:11027,n:'Stuttgart'},'70565':{i:11027,n:'Stuttgart'},
-    '70567':{i:11027,n:'Stuttgart'},'70569':{i:11027,n:'Stuttgart'},
-    '70597':{i:11027,n:'Stuttgart'},'70599':{i:11027,n:'Stuttgart'},
-    '70619':{i:11027,n:'Stuttgart'},
-};
-
-/* ═══ Normalize city name for Diyanet search ═══ */
-function normCity(name){
-    /* Remove common German suffixes, normalize umlauts for Turkish API */
-    return name
-        .replace(/\s+am\s+\w+$/i,'')
-        .replace(/\s+an\s+der\s+\w+$/i,'')
-        .replace(/\s+im\s+\w+$/i,'')
-        .replace(/\s+bei\s+\w+$/i,'')
-        .replace(/\s+ob\s+der\s+\w+$/i,'')
-        .replace(/\(.*?\)/g,'')
-        .trim();
-}
-
-/* Generate search variations for a city name */
-function cityVariations(name){
-    const vars=new Set();
-    vars.add(name);
-    const n=normCity(name);
-    if(n&&n!==name)vars.add(n);
-    /* Split hyphenated names */
-    if(name.includes('-'))vars.add(name.split('-')[0].trim());
-    if(n.includes('-'))vars.add(n.split('-')[0].trim());
-    /* Replace umlauts for Diyanet (Turkish system) */
-    const noUml=n.replace(/ä/gi,'a').replace(/ö/gi,'o').replace(/ü/gi,'u').replace(/ß/g,'ss');
-    if(noUml!==n)vars.add(noUml);
-    /* Common prefix-only (e.g. "Bad Homburg" → "Homburg") */
-    if(n.startsWith('Bad '))vars.add(n.slice(4));
-    if(n.startsWith('Sankt '))vars.add('St. '+n.slice(6));
-    vars.delete('');
-    return[...vars];
-}
-
-/* ═══ SEARCH – nur PLZ ═══ */
-async function go(){
-    const plz=$('plz').value.trim();
-    if(!plz){toast('Bitte PLZ eingeben.');return}
-    if(!/^\d{5}$/.test(plz)){toast('Bitte gültige 5-stellige PLZ.');return}
-
-    /* Dismiss keyboard on mobile */
-    document.activeElement?.blur();
-
-    busy(true);verified=false;
-    try{
-        let lat=null,lng=null,cityName='';
-
-        /* ── Step 1: Geocode PLZ → City + Coordinates ── */
-        const g=await geo(plz);
-        if(!g){busy(false);toast('PLZ nicht gefunden. Bitte gültige deutsche PLZ eingeben.');return}
-        lat=+g.lat;lng=+g.lon;
-        /* Extract city name from display_name */
-        const parts=g.display_name.split(',').map(s=>s.trim());
-        cityName=parts[0]||'';
-        /* Sometimes Nominatim returns the district first, take something reasonable */
-        if(cityName.length<3&&parts.length>1)cityName=parts[1];
-        const dn=`${plz} ${cityName}`;
-
-        /* ── Step 2: Try Diyanet (primary – official source) ── */
-        let dyRes=null,dyLocName='';
-
-        /* Fast path: known PLZ in cache */
-        if(K[plz]){
-            const k=K[plz];
-            dyRes=await dyTimes(k.i);
-            dyLocName=k.n;
+    /* Außerhalb Ramadan */
+    if(di<0){
+        const now=new Date();
+        const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+        const diff=Math.floor((R_START-today)/86400000);
+        $('meta').innerHTML=`📍 ${city}`;
+        if(diff>0){
+            $('cdT').textContent=`Noch ${diff} Tage bis Ramadan`;
+            $('cdT').className='cd-time end';
+        }else{
+            $('cdT').textContent='Ramadan 2026 ist beendet';
+            $('cdT').className='cd-time end';
         }
-
-        /* If not cached, search Diyanet with city name variations */
-        if(!dyRes){
-            const variations=cityVariations(cityName);
-            for(const v of variations){
-                const loc=await dySearch(v);
-                if(loc?.id){
-                    dyRes=await dyTimes(loc.id);
-                    if(dyRes){dyLocName=loc.region||loc.city||v;break}
-                }
-            }
-        }
-
-        /* ── Step 3: Always fetch Aladhan for cross-verification ── */
-        let alRes=null;
-        try{alRes=await alTimes(lat,lng)}catch(e){}
-
-        /* ── Step 4: Determine result and verify ── */
-        if(dyRes){
-            T=dyRes;src='diyanet';
-            /* Cross-check with Aladhan if available */
-            if(alRes){
-                const mDiff=timeDiffMin(dyRes.maghrib,alRes.maghrib);
-                const fDiff=timeDiffMin(dyRes.fajr,alRes.fajr);
-                /* Both sources agree within 3 minutes → verified */
-                verified=(mDiff<=3&&fDiff<=3);
-            }
-            render(dn,dyLocName);startCD();
-        } else if(alRes){
-            /* Fallback to Aladhan only */
-            T=alRes;src='aladhan';verified=false;
-            render(dn,'');startCD();
-        } else {
-            toast('Keine Gebetszeiten für diese PLZ gefunden.');
-        }
-    }catch(e){toast('Fehler – bitte erneut versuchen.')}
-    finally{busy(false)}
-}
-
-/* ═══ RENDER ═══ */
-function render(dn,dyLocName){
-    if(!T)return;
-    $('vF').textContent=T.fajr||'--:--';
-    $('vSu').textContent=T.sunrise||'--:--';
-    $('vD').textContent=T.dhuhr||'--:--';
-    $('vA').textContent=T.asr||'--:--';
-    $('vM').textContent=T.maghrib||'--:--';
-    $('vI').textContent=T.isha||'--:--';
-    $('cdTgt').innerHTML=`Akşam (İftar): ${T.maghrib||'--:--'}<span class="dot" id="dot"></span>`;
-    let badges='';
-    if(src==='diyanet'){
-        badges='<span class="badge badge-ok">Diyanet</span>';
-        if(verified)badges+='<span class="badge badge-verified">Verifiziert</span>';
-    }else{
-        badges='<span class="badge badge-fb">Aladhan</span>';
+        $('cdTgt').innerHTML='18. Februar – 19. März 2026';
+        $('dot')?.classList.add('off');
+        $('vM').textContent='--:--';
+        $('vDay').textContent='--';
+        $('prog').style.display='none';
+        $('ft').textContent='Ramadan Mubarak 🌙';
+        if(tk){clearInterval(tk);tk=null}
+        return;
     }
-    $('meta').innerHTML=`📍 ${dn} ${badges}`;
-    if(src==='diyanet'){
-        $('ft').innerHTML=verified
-            ?`Quelle: <b>Diyanet İşleri Başkanlığı</b> · Verifiziert mit Aladhan`
-            :`Quelle: <b>Diyanet İşleri Başkanlığı</b> · Offizielle Daten`;
-    }else{
-        $('ft').innerHTML=`Quelle: <a href="https://aladhan.com" target="_blank" rel="noopener">Aladhan</a> · Methode 13 · Exakte Koordinaten für PLZ`;
-    }
+
+    const iftar=D[city].split(',')[di];
+    $('vM').textContent=iftar;
+    $('vDay').textContent=`Tag ${di+1} / ${R_DAYS}`;
+    $('meta').innerHTML=`📍 ${city} · Ramadan Tag ${di+1} <span class="badge badge-ok">Diyanet</span>`;
+    $('cdTgt').innerHTML=`Akşam (İftar): ${iftar}<span class="dot" id="dot"></span>`;
     $('prog').style.display='block';
-    mark();
-}
+    $('ft').innerHTML='Quelle: <b>Diyanet İşleri Başkanlığı</b> · Feste Zeiten Ramadan 2026';
 
-/* Highlight current */
-function mark(){
-    if(!T)return;
-    const nm=new Date().getHours()*60+new Date().getMinutes();
-    const ps=[{k:'fajr',e:'cFajr'},{k:'sunrise',e:'cSun'},{k:'dhuhr',e:'cDhu'},{k:'asr',e:'cAsr'},{k:'maghrib',e:'cMag'},{k:'isha',e:'cIsha'}];
-    ps.forEach(p=>{const el=$(p.e);if(el)el.classList.remove('now')});
-    let cur=null;
-    for(let i=ps.length-1;i>=0;i--){const t=hm(T[ps[i].k]);if(t&&nm>=t.h*60+t.m){cur=ps[i];break}}
-    if(cur&&cur.e!=='cMag'){const el=$(cur.e);if(el)el.classList.add('now')}
-}
-
-/* ═══ COUNTDOWN ═══ */
-function startCD(){
+    /* Countdown starten */
     if(tk)clearInterval(tk);
+    const mg=hm(iftar);
+    if(!mg)return;
+    const imsak=hm(estImsak(di));
+
     const tick=()=>{
-        if(!T)return;
-        const now=new Date(),mg=hm(T.maghrib),fj=hm(T.fajr);if(!mg)return;
+        const now=new Date();
         const tgt=new Date();tgt.setHours(mg.h,mg.m,0,0);
         const el=$('cdT'),dot=$('dot');
+
         if(now>=tgt){
             el.textContent='🌙 İftar Vakti! Hayırlı İftarlar!';
-            el.className='cd-time end';if(dot)dot.classList.add('off');pct(100);return;
+            el.className='cd-time end';
+            if(dot)dot.classList.add('off');
+            pct(100);
+            return;
         }
-        el.className='cd-time on';if(dot)dot.classList.remove('off');
+        el.className='cd-time on';
+        if(dot)dot.classList.remove('off');
         const d=tgt-now;
         el.textContent=`${pad(Math.floor(d/36e5))}:${pad(Math.floor(d%36e5/6e4))}:${pad(Math.floor(d%6e4/1e3))}`;
-        if(fj){const fd=new Date();fd.setHours(fj.h,fj.m,0,0);pct(Math.max(0,Math.min(100,(now-fd)/(tgt-fd)*100)))}
-        mark();
+
+        if(imsak){
+            const fd=new Date();fd.setHours(imsak.h,imsak.m,0,0);
+            pct(Math.max(0,Math.min(100,(now-fd)/(tgt-fd)*100)));
+        }
     };
     tick();tk=setInterval(tick,1000);
 }
+
 function pct(v){$('pFill').style.width=v.toFixed(1)+'%';$('pPct').textContent=Math.round(v)+' %'}
 
 /* Events */
-$('btnGo').addEventListener('click',go);
-$('plz').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go()}});
+sel.addEventListener('change',show);
 
-/* Auto-load */
-$('plz').value='71691';
-go();
+/* Auto-Start */
+show();
 </script>
 </body>
 </html>
