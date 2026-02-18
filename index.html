@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+    <meta name="theme-color" content="#070b14">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Iftar Kompass – Gebetszeiten & Iftar-Countdown für Ramadan 2026. Offizielle Diyanet-Zeiten für Deutschland.">
+    <title>Iftar Kompass 🌙</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gold: #d4a853;
+            --gold-light: #f0d68a;
+            --gold-dark: #b8860b;
+            --gold-glow: rgba(212, 168, 83, 0.15);
+            --bg: #070b14;
+            --bg-card: rgba(15, 20, 35, 0.8);
+            --bg-input: rgba(10, 15, 28, 0.95);
+            --border: rgba(212, 168, 83, 0.1);
+            --border-subtle: rgba(100, 116, 139, 0.15);
+            --text: #edf2f7;
+            --text-sec: #8896a8;
+            --text-dim: #4a5568;
+            --green: #34d399;
+            --r: 14px;
+            --safe-b: env(safe-area-inset-bottom, 0px);
+        }
+
+        html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100dvh; overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Touch delay fix */
+        button, input, a { touch-action: manipulation; }
+
+        /* ── Autofill fix for dark theme ── */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+            -webkit-text-fill-color: var(--text) !important;
+            -webkit-box-shadow: 0 0 0 40px var(--bg-input) inset !important;
+            caret-color: var(--text);
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        /* ── Selection ── */
+        ::selection { background: rgba(212,168,83,0.25); color: var(--text); }
+
+        /* ── Starfield ── */
+        .sky { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .sky::after {
+            content: ''; position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 45% 35% at 12% 6%, rgba(212,168,83,0.04), transparent),
+                radial-gradient(ellipse 35% 45% at 88% 88%, rgba(59,130,246,0.025), transparent);
+        }
+        .star {
+            position: absolute; border-radius: 50%; background: #fff;
+            animation: twinkle var(--d) ease-in-out infinite alternate; opacity: 0;
+        }
+        @keyframes twinkle {
+            from { opacity: 0.06; transform: scale(0.6); }
+            to { opacity: var(--o, 0.55); transform: scale(1.2); }
+        }
+
+        /* ── App shell ── */
+        .app {
+            position: relative; z-index: 1;
+            max-width: 400px; margin: 0 auto;
+            padding: 12px 16px calc(12px + var(--safe-b));
+            min-height: 100dvh;
+            display: flex; flex-direction: column;
+        }
+
+        /* ── Header ── */
+        .hdr { text-align: center; padding: 16px 0 12px; animation: up .6s .1s both; }
+        @keyframes up {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bsm {
+            font-family: 'Amiri', serif; color: var(--gold);
+            opacity: 0.3; font-size: 0.82rem; letter-spacing: 4px;
+        }
+        .hdr h1 {
+            font-family: 'Amiri', serif; font-size: 1.9rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; line-height: 1.2;
+        }
+        .hdr-date {
+            font-size: 0.67rem; color: var(--text-dim);
+            margin-top: 2px; font-weight: 300;
+        }
+
+        /* ── Search ── */
+        .search { animation: up .6s .18s both; margin-bottom: 16px; }
+        .s-row { display: flex; gap: 8px; align-items: stretch; }
+        .s-fields { display: flex; gap: 6px; flex: 1; min-width: 0; }
+
+        .inp {
+            height: 46px; width: 100%;
+            background: var(--bg-input);
+            border: 1.5px solid var(--border-subtle);
+            color: var(--text); padding: 0 12px;
+            border-radius: var(--r);
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px; /* prevent iOS zoom */
+            transition: border-color .25s, box-shadow .25s;
+            -webkit-appearance: none; appearance: none;
+        }
+        .inp::placeholder { color: var(--text-dim); font-size: 0.82rem; }
+        .inp:focus {
+            outline: none; border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+        .inp:focus-visible {
+            outline: 2px solid var(--gold-light);
+            outline-offset: 1px;
+        }
+        .inp-plz {
+            width: 82px; min-width: 82px; flex: none;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1.5px; font-weight: 500;
+        }
+        .inp-city { flex: 1; min-width: 0; }
+
+        /* Search button */
+        .btn-go {
+            width: 46px; min-width: 46px; height: 46px;
+            border: none; border-radius: var(--r);
+            background: linear-gradient(145deg, var(--gold-light) -20%, var(--gold) 50%, var(--gold-dark) 120%);
+            color: #0a0e1a; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow:
+                0 2px 10px rgba(212,168,83,0.25),
+                0 0 20px rgba(212,168,83,0.08),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: transform .15s, box-shadow .15s, opacity .2s;
+            -webkit-tap-highlight-color: transparent;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Shimmer on hover/focus */
+        .btn-go::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.25) 50%, transparent 65%);
+            transform: translateX(-110%);
+            transition: transform .45s ease;
+        }
+        .btn-go:hover::after, .btn-go:focus-visible::after { transform: translateX(110%); }
+        .btn-go svg { width: 19px; height: 19px; position: relative; z-index: 1; }
+        .btn-go:active {
+            transform: scale(0.88);
+            box-shadow: 0 1px 4px rgba(212,168,83,0.15), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .btn-go:focus-visible {
+            outline: 2px solid var(--gold-light);
+            outline-offset: 2px;
+        }
+        .btn-go:disabled { opacity: 0.35; pointer-events: none; }
+
+        /* Location meta */
+        .s-meta {
+            margin-top: 7px; text-align: center;
+            font-size: 0.66rem; min-height: 17px;
+            color: var(--gold); font-weight: 500; opacity: 0.85;
+        }
+        .badge {
+            display: inline-flex; align-items: center;
+            font-size: 0.56rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 4px; margin-left: 5px;
+            letter-spacing: 0.4px; text-transform: uppercase;
+            vertical-align: middle; line-height: 1;
+        }
+        .badge-ok { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.22); }
+        .badge-fb { background: rgba(212,168,83,0.08); color: var(--gold); border: 1px solid rgba(212,168,83,0.15); }
+
+        /* ── Countdown ── */
+        .cd { text-align: center; padding: 6px 0 16px; animation: up .6s .3s both; }
+        .cd-orb {
+            position: relative; display: inline-flex;
+            align-items: center; justify-content: center;
+            width: 76px; height: 76px; margin-bottom: 10px;
+        }
+        .cd-orb::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            background: conic-gradient(from 0deg, var(--gold), transparent 16%, transparent 42%, var(--gold) 50%, transparent 66%, transparent 92%, var(--gold));
+            animation: spin 8s linear infinite; opacity: 0.22;
+        }
+        .cd-orb::after {
+            content: ''; position: absolute; inset: 2px;
+            border-radius: 50%; background: var(--bg);
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .cd-moon {
+            position: relative; z-index: 1;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #161d2c, #0a1020);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 16px rgba(212,168,83,0.06);
+        }
+        .cd-moon svg {
+            width: 26px; height: 26px; color: var(--gold);
+            filter: drop-shadow(0 0 5px rgba(212,168,83,0.3));
+        }
+        .cd-lbl {
+            font-size: 0.58rem; text-transform: uppercase;
+            letter-spacing: 2.5px; color: var(--text-sec); margin-bottom: 5px;
+        }
+        .cd-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.6rem; font-weight: 700;
+            letter-spacing: 1.5px; line-height: 1; color: var(--text);
+            transition: color .4s;
+        }
+        .cd-time.on { text-shadow: 0 0 32px rgba(212,168,83,0.12); }
+        .cd-time.end {
+            color: var(--green); font-size: 1.2rem;
+            font-family: 'Outfit', sans-serif; font-weight: 600;
+            letter-spacing: 0; line-height: 1.4;
+        }
+        .cd-tgt { margin-top: 5px; color: var(--gold); font-size: 0.76rem; font-weight: 500; }
+        .dot {
+            display: inline-block; width: 5px; height: 5px;
+            background: var(--gold); border-radius: 50%;
+            margin-left: 5px; vertical-align: 2px;
+            animation: blink 2s ease-in-out infinite;
+        }
+        .dot.off { display: none; }
+        @keyframes blink {
+            0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+        }
+
+        /* ── Progress ── */
+        .prog { margin-bottom: 14px; display: none; animation: up .4s both; padding: 0 2px; }
+        .prog-h {
+            display: flex; justify-content: space-between;
+            font-size: 0.58rem; color: var(--text-dim); margin-bottom: 5px;
+        }
+        .prog-bar {
+            height: 3px; background: rgba(100,116,139,0.08);
+            border-radius: 3px; overflow: visible; /* allow dot to show */
+            position: relative;
+        }
+        .prog-fill {
+            height: 100%; border-radius: 3px; width: 0%;
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+            transition: width .8s ease; position: relative;
+        }
+        .prog-dot {
+            position: absolute; right: -3px; top: -3px;
+            width: 7px; height: 7px;
+            background: var(--gold-light); border-radius: 50%;
+            box-shadow: 0 0 6px rgba(212,168,83,0.5);
+            pointer-events: none;
+        }
+
+        /* ── Prayer cards ── */
+        .prayers {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 8px; animation: up .6s .45s both;
+        }
+        .p {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r);
+            padding: 13px 12px 12px;
+            position: relative; overflow: hidden;
+            transition: border-color .3s, background .3s, box-shadow .3s;
+        }
+        .p::after {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 2.5px; height: 100%; border-radius: 0 2px 2px 0;
+            background: transparent; transition: background .3s;
+        }
+        .p-n {
+            font-size: 0.65rem; color: var(--text-sec);
+            font-weight: 400; letter-spacing: 0.2px; margin-bottom: 2px;
+        }
+        .p-t {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.05rem; font-weight: 700;
+            letter-spacing: 0.3px; color: var(--text);
+        }
+
+        /* İftar card */
+        .p.iftar {
+            background: rgba(212,168,83,0.04);
+            border-color: rgba(212,168,83,0.15);
+            box-shadow: 0 0 16px rgba(212,168,83,0.04);
+        }
+        .p.iftar::after { background: linear-gradient(to bottom, var(--gold-light), var(--gold-dark)); }
+        .p.iftar .p-n { color: var(--gold); font-weight: 500; }
+        .p.iftar .p-t { color: var(--gold-light); }
+
+        /* Current prayer */
+        .p.now { border-color: rgba(52,211,153,0.18); background: rgba(52,211,153,0.03); }
+        .p.now::after { background: var(--green); }
+
+        /* ── Footer ── */
+        .ft {
+            text-align: center; padding: 14px 8px 4px;
+            font-size: 0.6rem; color: var(--text-dim);
+            line-height: 1.55; animation: up .6s .55s both;
+        }
+        .ft a { color: var(--gold); opacity: 0.5; text-decoration: none; }
+        .ft b { color: var(--text-sec); font-weight: 500; }
+
+        /* ── Overlay spinner ── */
+        .ov {
+            display: none; position: fixed; inset: 0; z-index: 50;
+            background: rgba(7,11,20,0.85);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            align-items: center; justify-content: center;
+            flex-direction: column; gap: 14px;
+        }
+        .ov.on { display: flex; }
+        .ov-ring {
+            width: 36px; height: 36px;
+            border: 2.5px solid rgba(212,168,83,0.1);
+            border-top-color: var(--gold);
+            border-radius: 50%; animation: spin .7s linear infinite;
+        }
+        .ov-t { font-size: 0.76rem; color: var(--text-sec); }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed; bottom: calc(24px + var(--safe-b));
+            left: 50%; max-width: calc(100vw - 40px); width: auto;
+            transform: translateX(-50%) translateY(120px);
+            background: rgba(15,20,35,0.94); backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(248,113,113,0.2);
+            color: #fca5a5; padding: 12px 20px;
+            border-radius: var(--r);
+            font-size: 0.82rem; font-family: 'Outfit', sans-serif;
+            z-index: 100; text-align: center; white-space: nowrap;
+            transition: transform .4s cubic-bezier(.16,1,.3,1);
+            box-shadow: 0 10px 32px rgba(0,0,0,0.5);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* ── Responsive ── */
+        @media (max-width: 359px) {
+            .hdr h1 { font-size: 1.6rem; }
+            .cd-time { font-size: 2.1rem; }
+            .p-t { font-size: 0.95rem; }
+            .inp-plz { width: 72px; min-width: 72px; }
+            .btn-go { width: 42px; min-width: 42px; height: 42px; }
+            .inp { height: 42px; }
+        }
+        @media (min-width: 360px) and (max-width: 389px) {
+            .cd-time { font-size: 2.4rem; }
+        }
+        @media (min-width: 414px) {
+            .app { padding: 20px 20px calc(16px + var(--safe-b)); }
+        }
+        @media (min-height: 780px) {
+            .cd { padding: 10px 0 22px; }
+            .prayers { gap: 10px; }
+        }
+        /* Landscape phone */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .cd-orb { width: 50px; height: 50px; margin-bottom: 6px; }
+            .cd-moon { width: 40px; height: 40px; }
+            .cd-moon svg { width: 18px; height: 18px; }
+            .cd-time { font-size: 2rem; }
+            .cd { padding: 2px 0 8px; }
+            .hdr { padding: 8px 0 6px; }
+            .prayers { gap: 6px; }
+            .p { padding: 10px; }
+        }
+        /* Accessibility: reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .star { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sky" id="sky"></div>
+<div class="ov" id="ov"><div class="ov-ring"></div><div class="ov-t">Gebetszeiten laden…</div></div>
+<div class="toast" id="toast"></div>
+
+<div class="app">
+    <header class="hdr">
+        <div class="bsm">☽ بسم الله ☽</div>
+        <h1>Iftar Kompass</h1>
+        <div class="hdr-date" id="dateStr"></div>
+    </header>
+
+    <div class="search">
+        <div class="s-row">
+            <div class="s-fields">
+                <input type="text" id="plz" class="inp inp-plz" placeholder="PLZ" maxlength="5" inputmode="numeric" pattern="[0-9]*" autocomplete="postal-code" enterkeyhint="search">
+                <input type="text" id="city" class="inp inp-city" placeholder="Stadt" autocomplete="address-level2" enterkeyhint="search">
+            </div>
+            <button class="btn-go" id="btnGo" aria-label="Suchen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+        </div>
+        <div class="s-meta" id="meta"></div>
+    </div>
+
+    <div class="cd">
+        <div class="cd-orb"><div class="cd-moon"><svg viewBox="0 0 24 24" fill="rgba(212,168,83,0.08)" stroke="currentColor" stroke-width="1.5"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div></div>
+        <div class="cd-lbl">Verbleibende Zeit bis İftar</div>
+        <div class="cd-time" id="cdT">--:--:--</div>
+        <div class="cd-tgt" id="cdTgt">Akşam (İftar): --:--<span class="dot off" id="dot"></span></div>
+    </div>
+
+    <div class="prog" id="prog">
+        <div class="prog-h"><span>İmsak</span><span id="pPct">0 %</span><span>Akşam</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="pFill"><div class="prog-dot"></div></div></div>
+    </div>
+
+    <div class="prayers" id="prayers">
+        <div class="p" id="cFajr"><div class="p-n">İmsak · Sahur</div><div class="p-t" id="vF">--:--</div></div>
+        <div class="p" id="cSun"><div class="p-n">Güneş</div><div class="p-t" id="vSu">--:--</div></div>
+        <div class="p" id="cDhu"><div class="p-n">Öğle</div><div class="p-t" id="vD">--:--</div></div>
+        <div class="p" id="cAsr"><div class="p-n">İkindi</div><div class="p-t" id="vA">--:--</div></div>
+        <div class="p iftar" id="cMag"><div class="p-n">Akşam · İftar ☽</div><div class="p-t" id="vM">--:--</div></div>
+        <div class="p" id="cIsha"><div class="p-n">Yatsı</div><div class="p-t" id="vI">--:--</div></div>
+    </div>
+
+    <div class="ft" id="ft">Ramadan Mubarak 🌙</div>
+</div>
+
+<script>
+/* Stars */
+(()=>{const c=document.getElementById('sky');for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2.5+Math.random()*5}s;--o:${(.2+Math.random()*.4).toFixed(2)};animation-delay:${Math.random()*5}s;width:${.8+Math.random()*1.6}px;height:${.8+Math.random()*1.6}px`;c.appendChild(s)}})();
+
+/* State */
+let T=null, tk=null, src='';
+
+/* Helpers */
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500)}
+function busy(on){$('ov').classList.toggle('on',on);$('btnGo').disabled=on}
+function hm(s){if(!s)return null;const p=s.replace(/\s*\(.*\)/,'').trim().split(':');const h=parseInt(p[0]),m=parseInt(p[1]);return isNaN(h)||isNaN(m)?null:{h,m}}
+function pad(n){return String(n).padStart(2,'0')}
+
+/* Date */
+$('dateStr').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+/* PLZ: nur Ziffern erlauben */
+$('plz').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'')});
+
+/* ═══ DIYANET PROXY ═══ */
+const DY='https://prayertimes.api.abdus.dev/api/diyanet';
+
+async function dySearch(city){
+    try{
+        const r=await fetch(`${DY}/search?q=${encodeURIComponent(city)}`,{signal:AbortSignal.timeout(6000)});
+        if(!r.ok)return null;const d=await r.json();if(!d||!d.length)return null;
+        const de=d.filter(x=>x.country&&(x.country.includes('ALMANYA')||x.country.includes('GERMANY')));
+        if(de.length){const ex=de.find(x=>x.region&&x.region.toUpperCase().includes(city.toUpperCase()));return ex||de[0]}
+        return d[0];
+    }catch(e){return null}
+}
+
+async function dyTimes(id){
+    try{
+        const r=await fetch(`${DY}/prayertimes?location_id=${id}`,{signal:AbortSignal.timeout(8000)});
+        if(!r.ok)return null;const d=await r.json();if(!d||!d.length)return null;
+        const now=new Date(),key=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+        const e=d.find(x=>x.date&&x.date.startsWith(key));
+        return e?{fajr:e.fajr,sunrise:e.sun,dhuhr:e.dhuhr,asr:e.asr,maghrib:e.maghrib,isha:e.isha}:null;
+    }catch(e){return null}
+}
+
+/* ═══ ALADHAN FALLBACK ═══ */
+async function alTimes(lat,lng){
+    const n=new Date();
+    const r=await fetch(`https://api.aladhan.com/v1/timings/${pad(n.getDate())}-${pad(n.getMonth()+1)}-${n.getFullYear()}?latitude=${lat}&longitude=${lng}&method=13`,{signal:AbortSignal.timeout(10000)});
+    if(!r.ok)throw 0;const j=await r.json();if(j.code!==200)throw 0;
+    const t=j.data.timings,c=s=>s?s.replace(/\s*\(.*\)/,'').trim():'--:--';
+    return{fajr:c(t.Imsak||t.Fajr),sunrise:c(t.Sunrise),dhuhr:c(t.Dhuhr),asr:c(t.Asr),maghrib:c(t.Maghrib),isha:c(t.Isha)};
+}
+
+/* ═══ GEOCODING ═══ */
+async function geo(plz,city){
+    const qs=[];
+    if(plz&&city)qs.push(`postalcode=${encodeURIComponent(plz)}&city=${encodeURIComponent(city)}&country=Germany`);
+    if(plz)qs.push(`postalcode=${encodeURIComponent(plz)}&country=Germany`);
+    if(city)qs.push(`city=${encodeURIComponent(city)}&country=Germany`);
+    for(const q of qs){try{const r=await fetch(`https://nominatim.openstreetmap.org/search?${q}&format=json&limit=1&accept-language=de`,{signal:AbortSignal.timeout(6000)});const d=await r.json();if(d&&d.length)return d[0]}catch(e){}}
+    return null;
+}
+
+/* ═══ KNOWN PLZ → DIYANET ═══ */
+const K={
+    '71691':{i:11048,n:'Freiberg am Neckar'},'71636':{i:11048,n:'Ludwigsburg'},
+    '71638':{i:11048,n:'Ludwigsburg'},'71640':{i:11048,n:'Ludwigsburg'},
+    '71642':{i:11048,n:'Ludwigsburg'},'71634':{i:11048,n:'Ludwigsburg'},
+    '70173':{i:11027,n:'Stuttgart'},'70174':{i:11027,n:'Stuttgart'},
+    '70176':{i:11027,n:'Stuttgart'},'70178':{i:11027,n:'Stuttgart'},
+    '70180':{i:11027,n:'Stuttgart'},'70182':{i:11027,n:'Stuttgart'},
+    '70184':{i:11027,n:'Stuttgart'},'70186':{i:11027,n:'Stuttgart'},
+    '70188':{i:11027,n:'Stuttgart'},'70190':{i:11027,n:'Stuttgart'},
+    '70191':{i:11027,n:'Stuttgart'},'70192':{i:11027,n:'Stuttgart'},
+    '70193':{i:11027,n:'Stuttgart'},'70195':{i:11027,n:'Stuttgart'},
+    '70197':{i:11027,n:'Stuttgart'},'70199':{i:11027,n:'Stuttgart'},
+    '70327':{i:11027,n:'Stuttgart'},'70329':{i:11027,n:'Stuttgart'},
+    '70372':{i:11027,n:'Stuttgart'},'70374':{i:11027,n:'Stuttgart'},
+    '70376':{i:11027,n:'Stuttgart'},'70378':{i:11027,n:'Stuttgart'},
+    '70435':{i:11027,n:'Stuttgart'},'70437':{i:11027,n:'Stuttgart'},
+    '70439':{i:11027,n:'Stuttgart'},'70499':{i:11027,n:'Stuttgart'},
+    '70563':{i:11027,n:'Stuttgart'},'70565':{i:11027,n:'Stuttgart'},
+    '70567':{i:11027,n:'Stuttgart'},'70569':{i:11027,n:'Stuttgart'},
+    '70597':{i:11027,n:'Stuttgart'},'70599':{i:11027,n:'Stuttgart'},
+    '70619':{i:11027,n:'Stuttgart'},
+};
+
+/* ═══ SEARCH ═══ */
+async function go(){
+    const plz=$('plz').value.trim(), city=$('city').value.trim();
+    if(!plz&&!city){toast('Bitte PLZ oder Stadt eingeben.');return}
+    if(plz&&!/^\d{5}$/.test(plz)){toast('Bitte gültige 5-stellige PLZ.');return}
+
+    /* Dismiss keyboard on mobile */
+    document.activeElement?.blur();
+
+    busy(true);
+    try{
+        /* Fast path */
+        if(plz&&K[plz]){
+            const k=K[plz],dn=`${plz} ${k.n}`;
+            const res=await dyTimes(k.i);
+            if(res){T=res;src='diyanet';render(dn);startCD();busy(false);return}
+        }
+        /* Geocode */
+        const g=await geo(plz,city);
+        if(!g){busy(false);toast('PLZ/Stadt nicht gefunden.');return}
+        const lat=+g.lat,lng=+g.lon;
+        const cn=city||g.display_name.split(',')[0].trim();
+        const dn=plz?`${plz} ${cn}`:cn;
+        /* Try Diyanet */
+        let res=null;
+        const loc=await dySearch(cn);
+        if(loc?.id){res=await dyTimes(loc.id);if(res)src='diyanet'}
+        /* Variations */
+        if(!res){
+            for(const v of[cn.replace(/\s+am\s+\w+$/i,'').trim(),cn.split('-')[0].trim()].filter(v=>v&&v!==cn)){
+                const l2=await dySearch(v);if(l2?.id){res=await dyTimes(l2.id);if(res){src='diyanet';break}}
+            }
+        }
+        /* Aladhan fallback */
+        if(!res){try{res=await alTimes(lat,lng);src='aladhan'}catch(e){}}
+        if(!res){busy(false);toast('Keine Gebetszeiten gefunden.');return}
+        T=res;render(dn);startCD();
+    }catch(e){toast('Fehler – bitte erneut versuchen.')}
+    finally{busy(false)}
+}
+
+/* ═══ RENDER ═══ */
+function render(dn){
+    if(!T)return;
+    $('vF').textContent=T.fajr||'--:--';
+    $('vSu').textContent=T.sunrise||'--:--';
+    $('vD').textContent=T.dhuhr||'--:--';
+    $('vA').textContent=T.asr||'--:--';
+    $('vM').textContent=T.maghrib||'--:--';
+    $('vI').textContent=T.isha||'--:--';
+    $('cdTgt').innerHTML=`Akşam (İftar): ${T.maghrib||'--:--'}<span class="dot" id="dot"></span>`;
+    const b=src==='diyanet'?'<span class="badge badge-ok">Diyanet</span>':'<span class="badge badge-fb">Aladhan</span>';
+    $('meta').innerHTML=`📍 ${dn} ${b}`;
+    $('ft').innerHTML=src==='diyanet'
+        ?`Quelle: <b>Diyanet İşleri Başkanlığı</b> · Offizielle Daten`
+        :`Quelle: <a href="https://aladhan.com" target="_blank" rel="noopener">Aladhan</a> · Methode 13 · ±1–2 Min`;
+    $('prog').style.display='block';
+    mark();
+}
+
+/* Highlight current */
+function mark(){
+    if(!T)return;
+    const nm=new Date().getHours()*60+new Date().getMinutes();
+    const ps=[{k:'fajr',e:'cFajr'},{k:'sunrise',e:'cSun'},{k:'dhuhr',e:'cDhu'},{k:'asr',e:'cAsr'},{k:'maghrib',e:'cMag'},{k:'isha',e:'cIsha'}];
+    ps.forEach(p=>{const el=$(p.e);if(el)el.classList.remove('now')});
+    let cur=null;
+    for(let i=ps.length-1;i>=0;i--){const t=hm(T[ps[i].k]);if(t&&nm>=t.h*60+t.m){cur=ps[i];break}}
+    if(cur&&cur.e!=='cMag'){const el=$(cur.e);if(el)el.classList.add('now')}
+}
+
+/* ═══ COUNTDOWN ═══ */
+function startCD(){
+    if(tk)clearInterval(tk);
+    const tick=()=>{
+        if(!T)return;
+        const now=new Date(),mg=hm(T.maghrib),fj=hm(T.fajr);if(!mg)return;
+        const tgt=new Date();tgt.setHours(mg.h,mg.m,0,0);
+        const el=$('cdT'),dot=$('dot');
+        if(now>=tgt){
+            el.textContent='🌙 İftar Vakti! Hayırlı İftarlar!';
+            el.className='cd-time end';if(dot)dot.classList.add('off');pct(100);return;
+        }
+        el.className='cd-time on';if(dot)dot.classList.remove('off');
+        const d=tgt-now;
+        el.textContent=`${pad(Math.floor(d/36e5))}:${pad(Math.floor(d%36e5/6e4))}:${pad(Math.floor(d%6e4/1e3))}`;
+        if(fj){const fd=new Date();fd.setHours(fj.h,fj.m,0,0);pct(Math.max(0,Math.min(100,(now-fd)/(tgt-fd)*100)))}
+        mark();
+    };
+    tick();tk=setInterval(tick,1000);
+}
+function pct(v){$('pFill').style.width=v.toFixed(1)+'%';$('pPct').textContent=Math.round(v)+' %'}
+
+/* Events */
+$('btnGo').addEventListener('click',go);
+$('plz').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go()}});
+$('city').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go()}});
+
+/* Auto-load */
+$('plz').value='71691';
+$('city').value='Freiberg am Neckar';
+go();
+</script>
+</body>
+</html>
