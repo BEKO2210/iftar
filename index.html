@@ -132,12 +132,12 @@
             outline-offset: 1px;
         }
         .inp-plz {
-            width: 82px; min-width: 82px; flex: none;
+            flex: 1;
             text-align: center;
             font-family: 'JetBrains Mono', monospace;
-            letter-spacing: 1.5px; font-weight: 500;
+            letter-spacing: 2.5px; font-weight: 500;
+            font-size: 1.1rem;
         }
-        .inp-city { flex: 1; min-width: 0; }
 
         /* Search button */
         .btn-go {
@@ -189,6 +189,7 @@
             vertical-align: middle; line-height: 1;
         }
         .badge-ok { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.22); }
+        .badge-verified { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
         .badge-fb { background: rgba(212,168,83,0.08); color: var(--gold); border: 1px solid rgba(212,168,83,0.15); }
 
         /* ── Countdown ── */
@@ -414,8 +415,7 @@
     <div class="search">
         <div class="s-row">
             <div class="s-fields">
-                <input type="text" id="plz" class="inp inp-plz" placeholder="PLZ" maxlength="5" inputmode="numeric" pattern="[0-9]*" autocomplete="postal-code" enterkeyhint="search">
-                <input type="text" id="city" class="inp inp-city" placeholder="Stadt" autocomplete="address-level2" enterkeyhint="search">
+                <input type="text" id="plz" class="inp inp-plz" placeholder="PLZ eingeben" maxlength="5" inputmode="numeric" pattern="[0-9]*" autocomplete="postal-code" enterkeyhint="search">
             </div>
             <button class="btn-go" id="btnGo" aria-label="Suchen">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -453,7 +453,7 @@
 (()=>{const c=document.getElementById('sky');for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2.5+Math.random()*5}s;--o:${(.2+Math.random()*.4).toFixed(2)};animation-delay:${Math.random()*5}s;width:${.8+Math.random()*1.6}px;height:${.8+Math.random()*1.6}px`;c.appendChild(s)}})();
 
 /* State */
-let T=null, tk=null, src='';
+let T=null, tk=null, src='', verified=false;
 
 /* Helpers */
 const $=id=>document.getElementById(id);
@@ -461,6 +461,8 @@ function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');set
 function busy(on){$('ov').classList.toggle('on',on);$('btnGo').disabled=on}
 function hm(s){if(!s)return null;const p=s.replace(/\s*\(.*\)/,'').trim().split(':');const h=parseInt(p[0]),m=parseInt(p[1]);return isNaN(h)||isNaN(m)?null:{h,m}}
 function pad(n){return String(n).padStart(2,'0')}
+/* Compare two HH:MM times – returns absolute difference in minutes */
+function timeDiffMin(a,b){const ta=hm(a),tb=hm(b);if(!ta||!tb)return 999;return Math.abs((ta.h*60+ta.m)-(tb.h*60+tb.m))}
 
 /* Date */
 $('dateStr').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
@@ -491,7 +493,7 @@ async function dyTimes(id){
     }catch(e){return null}
 }
 
-/* ═══ ALADHAN FALLBACK ═══ */
+/* ═══ ALADHAN ═══ */
 async function alTimes(lat,lng){
     const n=new Date();
     const r=await fetch(`https://api.aladhan.com/v1/timings/${pad(n.getDate())}-${pad(n.getMonth()+1)}-${n.getFullYear()}?latitude=${lat}&longitude=${lng}&method=13`,{signal:AbortSignal.timeout(10000)});
@@ -501,16 +503,15 @@ async function alTimes(lat,lng){
 }
 
 /* ═══ GEOCODING ═══ */
-async function geo(plz,city){
-    const qs=[];
-    if(plz&&city)qs.push(`postalcode=${encodeURIComponent(plz)}&city=${encodeURIComponent(city)}&country=Germany`);
-    if(plz)qs.push(`postalcode=${encodeURIComponent(plz)}&country=Germany`);
-    if(city)qs.push(`city=${encodeURIComponent(city)}&country=Germany`);
-    for(const q of qs){try{const r=await fetch(`https://nominatim.openstreetmap.org/search?${q}&format=json&limit=1&accept-language=de`,{signal:AbortSignal.timeout(6000)});const d=await r.json();if(d&&d.length)return d[0]}catch(e){}}
+async function geo(plz){
+    try{
+        const r=await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(plz)}&country=Germany&format=json&limit=3&accept-language=de`,{signal:AbortSignal.timeout(6000)});
+        const d=await r.json();if(d&&d.length)return d[0];
+    }catch(e){}
     return null;
 }
 
-/* ═══ KNOWN PLZ → DIYANET ═══ */
+/* ═══ KNOWN PLZ → DIYANET (schneller Pfad) ═══ */
 const K={
     '71691':{i:11048,n:'Freiberg am Neckar'},'71636':{i:11048,n:'Ludwigsburg'},
     '71638':{i:11048,n:'Ludwigsburg'},'71640':{i:11048,n:'Ludwigsburg'},
@@ -534,49 +535,112 @@ const K={
     '70619':{i:11027,n:'Stuttgart'},
 };
 
-/* ═══ SEARCH ═══ */
+/* ═══ Normalize city name for Diyanet search ═══ */
+function normCity(name){
+    /* Remove common German suffixes, normalize umlauts for Turkish API */
+    return name
+        .replace(/\s+am\s+\w+$/i,'')
+        .replace(/\s+an\s+der\s+\w+$/i,'')
+        .replace(/\s+im\s+\w+$/i,'')
+        .replace(/\s+bei\s+\w+$/i,'')
+        .replace(/\s+ob\s+der\s+\w+$/i,'')
+        .replace(/\(.*?\)/g,'')
+        .trim();
+}
+
+/* Generate search variations for a city name */
+function cityVariations(name){
+    const vars=new Set();
+    vars.add(name);
+    const n=normCity(name);
+    if(n&&n!==name)vars.add(n);
+    /* Split hyphenated names */
+    if(name.includes('-'))vars.add(name.split('-')[0].trim());
+    if(n.includes('-'))vars.add(n.split('-')[0].trim());
+    /* Replace umlauts for Diyanet (Turkish system) */
+    const noUml=n.replace(/ä/gi,'a').replace(/ö/gi,'o').replace(/ü/gi,'u').replace(/ß/g,'ss');
+    if(noUml!==n)vars.add(noUml);
+    /* Common prefix-only (e.g. "Bad Homburg" → "Homburg") */
+    if(n.startsWith('Bad '))vars.add(n.slice(4));
+    if(n.startsWith('Sankt '))vars.add('St. '+n.slice(6));
+    vars.delete('');
+    return[...vars];
+}
+
+/* ═══ SEARCH – nur PLZ ═══ */
 async function go(){
-    const plz=$('plz').value.trim(), city=$('city').value.trim();
-    if(!plz&&!city){toast('Bitte PLZ oder Stadt eingeben.');return}
-    if(plz&&!/^\d{5}$/.test(plz)){toast('Bitte gültige 5-stellige PLZ.');return}
+    const plz=$('plz').value.trim();
+    if(!plz){toast('Bitte PLZ eingeben.');return}
+    if(!/^\d{5}$/.test(plz)){toast('Bitte gültige 5-stellige PLZ.');return}
 
     /* Dismiss keyboard on mobile */
     document.activeElement?.blur();
 
-    busy(true);
+    busy(true);verified=false;
     try{
-        /* Fast path */
-        if(plz&&K[plz]){
-            const k=K[plz],dn=`${plz} ${k.n}`;
-            const res=await dyTimes(k.i);
-            if(res){T=res;src='diyanet';render(dn);startCD();busy(false);return}
+        let lat=null,lng=null,cityName='';
+
+        /* ── Step 1: Geocode PLZ → City + Coordinates ── */
+        const g=await geo(plz);
+        if(!g){busy(false);toast('PLZ nicht gefunden. Bitte gültige deutsche PLZ eingeben.');return}
+        lat=+g.lat;lng=+g.lon;
+        /* Extract city name from display_name */
+        const parts=g.display_name.split(',').map(s=>s.trim());
+        cityName=parts[0]||'';
+        /* Sometimes Nominatim returns the district first, take something reasonable */
+        if(cityName.length<3&&parts.length>1)cityName=parts[1];
+        const dn=`${plz} ${cityName}`;
+
+        /* ── Step 2: Try Diyanet (primary – official source) ── */
+        let dyRes=null,dyLocName='';
+
+        /* Fast path: known PLZ in cache */
+        if(K[plz]){
+            const k=K[plz];
+            dyRes=await dyTimes(k.i);
+            dyLocName=k.n;
         }
-        /* Geocode */
-        const g=await geo(plz,city);
-        if(!g){busy(false);toast('PLZ/Stadt nicht gefunden.');return}
-        const lat=+g.lat,lng=+g.lon;
-        const cn=city||g.display_name.split(',')[0].trim();
-        const dn=plz?`${plz} ${cn}`:cn;
-        /* Try Diyanet */
-        let res=null;
-        const loc=await dySearch(cn);
-        if(loc?.id){res=await dyTimes(loc.id);if(res)src='diyanet'}
-        /* Variations */
-        if(!res){
-            for(const v of[cn.replace(/\s+am\s+\w+$/i,'').trim(),cn.split('-')[0].trim()].filter(v=>v&&v!==cn)){
-                const l2=await dySearch(v);if(l2?.id){res=await dyTimes(l2.id);if(res){src='diyanet';break}}
+
+        /* If not cached, search Diyanet with city name variations */
+        if(!dyRes){
+            const variations=cityVariations(cityName);
+            for(const v of variations){
+                const loc=await dySearch(v);
+                if(loc?.id){
+                    dyRes=await dyTimes(loc.id);
+                    if(dyRes){dyLocName=loc.region||loc.city||v;break}
+                }
             }
         }
-        /* Aladhan fallback */
-        if(!res){try{res=await alTimes(lat,lng);src='aladhan'}catch(e){}}
-        if(!res){busy(false);toast('Keine Gebetszeiten gefunden.');return}
-        T=res;render(dn);startCD();
+
+        /* ── Step 3: Always fetch Aladhan for cross-verification ── */
+        let alRes=null;
+        try{alRes=await alTimes(lat,lng)}catch(e){}
+
+        /* ── Step 4: Determine result and verify ── */
+        if(dyRes){
+            T=dyRes;src='diyanet';
+            /* Cross-check with Aladhan if available */
+            if(alRes){
+                const mDiff=timeDiffMin(dyRes.maghrib,alRes.maghrib);
+                const fDiff=timeDiffMin(dyRes.fajr,alRes.fajr);
+                /* Both sources agree within 3 minutes → verified */
+                verified=(mDiff<=3&&fDiff<=3);
+            }
+            render(dn,dyLocName);startCD();
+        } else if(alRes){
+            /* Fallback to Aladhan only */
+            T=alRes;src='aladhan';verified=false;
+            render(dn,'');startCD();
+        } else {
+            toast('Keine Gebetszeiten für diese PLZ gefunden.');
+        }
     }catch(e){toast('Fehler – bitte erneut versuchen.')}
     finally{busy(false)}
 }
 
 /* ═══ RENDER ═══ */
-function render(dn){
+function render(dn,dyLocName){
     if(!T)return;
     $('vF').textContent=T.fajr||'--:--';
     $('vSu').textContent=T.sunrise||'--:--';
@@ -585,11 +649,22 @@ function render(dn){
     $('vM').textContent=T.maghrib||'--:--';
     $('vI').textContent=T.isha||'--:--';
     $('cdTgt').innerHTML=`Akşam (İftar): ${T.maghrib||'--:--'}<span class="dot" id="dot"></span>`;
-    const b=src==='diyanet'?'<span class="badge badge-ok">Diyanet</span>':'<span class="badge badge-fb">Aladhan</span>';
-    $('meta').innerHTML=`📍 ${dn} ${b}`;
-    $('ft').innerHTML=src==='diyanet'
-        ?`Quelle: <b>Diyanet İşleri Başkanlığı</b> · Offizielle Daten`
-        :`Quelle: <a href="https://aladhan.com" target="_blank" rel="noopener">Aladhan</a> · Methode 13 · ±1–2 Min`;
+    let badges='';
+    if(src==='diyanet'){
+        badges='<span class="badge badge-ok">Diyanet</span>';
+        if(verified)badges+='<span class="badge badge-verified">Verifiziert</span>';
+    }else{
+        badges='<span class="badge badge-fb">Aladhan</span>';
+    }
+    const locInfo=dyLocName?`${dn} (${dyLocName})`:dn;
+    $('meta').innerHTML=`📍 ${locInfo} ${badges}`;
+    if(src==='diyanet'){
+        $('ft').innerHTML=verified
+            ?`Quelle: <b>Diyanet İşleri Başkanlığı</b> · Verifiziert mit Aladhan`
+            :`Quelle: <b>Diyanet İşleri Başkanlığı</b> · Offizielle Daten`;
+    }else{
+        $('ft').innerHTML=`Quelle: <a href="https://aladhan.com" target="_blank" rel="noopener">Aladhan</a> · Methode 13 · Exakte Koordinaten für PLZ`;
+    }
     $('prog').style.display='block';
     mark();
 }
@@ -630,11 +705,9 @@ function pct(v){$('pFill').style.width=v.toFixed(1)+'%';$('pPct').textContent=Ma
 /* Events */
 $('btnGo').addEventListener('click',go);
 $('plz').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go()}});
-$('city').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go()}});
 
 /* Auto-load */
 $('plz').value='71691';
-$('city').value='Freiberg am Neckar';
 go();
 </script>
 </body>
