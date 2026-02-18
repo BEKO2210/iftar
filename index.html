@@ -656,8 +656,7 @@ function render(dn,dyLocName){
     }else{
         badges='<span class="badge badge-fb">Aladhan</span>';
     }
-    const locInfo=dyLocName?`${dn} (${dyLocName})`:dn;
-    $('meta').innerHTML=`📍 ${locInfo} ${badges}`;
+    $('meta').innerHTML=`📍 ${dn} ${badges}`;
     if(src==='diyanet'){
         $('ft').innerHTML=verified
             ?`Quelle: <b>Diyanet İşleri Başkanlığı</b> · Verifiziert mit Aladhan`
